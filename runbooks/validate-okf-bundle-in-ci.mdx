@@ -1,0 +1,71 @@
+---
+title: "CI で OKF バンドルを検証する"
+type: Runbook
+description: 適合性チェックを CI に組み込み、リンク切れや孤立概念を警告として可視化する手順。
+tags: [okf, ci, validation, runbook]
+status: draft
+generated: { by: claude_code/claude-opus-5, at: 2026-07-28T00:30:00Z }
+stale_after: 2026-10-31
+sources:
+  - id: okf-skills
+    resource: https://github.com/scaccogatto/okf-skills
+    title: okf-skills — OKF toolkit for Claude Code（v0.2 対応バリデータ、GitHub Action 同梱）
+    last_modified: 2026-07-25
+  - id: okft
+    resource: https://github.com/PoorvaJ-WW/okft
+    title: okft — OKF bundle linter + MCP server（v0.1 準拠）
+---
+
+## 前提
+
+[OKF](/formats/okf) の適合条件は 3 つしかなく、機械的に判定できる。逆に言えば、リンク切れも孤立概念も仕様上はエラーではないので、放置すればバンドルは適合したまま静かに腐る。CI に置く目的は適合性の証明ではなく、**腐敗の可視化**にある。
+
+## 選択肢
+
+| ツール | 対応版 | 形態 | 備考 |
+|---|---|---|---|
+| `okf_validate.py`（okf-skills） | v0.2 | 単一ファイル、PEP 723 | `--migrate` で v0.1 → v0.2 の書き換えも行う |
+| `okft lint` | v0.1 | `pip install okft` | JSON 出力、MCP サーバも同梱 |
+
+v0.2 の frontmatter（`generated` / `verified` / `sources`）を使うなら前者。v0.1 のままなら後者でよい。
+
+## 手順
+
+### 1. ローカルで通す
+
+```bash
+python3 -m venv .venv
+.venv/bin/pip install pyyaml
+curl -sSL -o okf_validate.py \
+  https://raw.githubusercontent.com/scaccogatto/okf-skills/main/skills/validate/scripts/okf_validate.py
+.venv/bin/python okf_validate.py .okf
+```
+
+エラーが出るのは frontmatter が壊れているか `type` が無いときだけ。それ以外は警告として出る。
+
+### 2. CI に置く
+
+GitHub Actions の場合、composite action がそのまま使える。
+
+```yaml
+- uses: scaccogatto/okf-skills@main
+  with:
+    bundle: .okf
+    strict: "true"
+```
+
+`strict: "true"` は警告もエラー扱いにする。書き始めの時期は警告が出るのが普通なので、まずは `max-warnings` に現状の件数を入れ、そこから減らす方向で運用したほうが続く。
+
+### 3. 落ちたときの読み方
+
+| 症状 | 意味 | 対処 |
+|---|---|---|
+| `type` が無い | 適合違反 | frontmatter に `type` を足す。値は自由。 |
+| frontmatter がパースできない | 適合違反 | YAML の構文エラー。インデントか引用符を疑う。 |
+| リンクが解決しない | 警告 | 移動か改名か、未執筆の概念。前者なら直す。 |
+| 孤立概念 | 警告 | どこからもリンクされていない。`index.md` に足すか、そもそも要るのかを問う。 |
+| 予約ファイルに frontmatter | 適合違反 | `index.md` / `log.md` は frontmatter を持てない。例外はバンドル直下の `index.md` の `okf_version` のみ。 |
+
+## 注意
+
+孤立概念の警告は、書き始めの時期には大量に出る。これを潰すために無理に相互リンクを張ると、意味のないリンクでグラフが濁る。リンクは関係が実在するときだけ張り、それ以外は `index.md` から辿れる状態で足りると考えたほうがよい。

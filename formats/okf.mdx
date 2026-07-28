@@ -1,0 +1,89 @@
+---
+title: "Open Knowledge Format (OKF)"
+description: "組織知を YAML frontmatter 付き Markdown のディレクトリとして梱包する、ベンダー中立のオープン仕様。"
+type: Format
+resource: https://github.com/GoogleCloudPlatform/knowledge-catalog/tree/main/okf
+tags: [okf, knowledge, spec, markdown]
+status: stable
+generated: { by: claude_code/claude-opus-5, at: 2026-07-28T00:30:00Z }
+stale_after: 2026-10-31
+sources:
+  - id: spec
+    resource: https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md
+    title: Open Knowledge Format SPEC.md (v0.2)
+    author: team:google-cloud-data-cloud
+    last_modified: 2026-07-24
+  - id: blog-v01
+    resource: https://cloud.google.com/blog/products/data-analytics/how-the-open-knowledge-format-can-improve-data-sharing
+    title: How the Open Knowledge Format can improve data sharing
+    author: team:google-cloud-data-cloud
+    last_modified: 2026-06-13
+  - id: blog-v02
+    resource: https://cloud.google.com/blog/products/data-analytics/okf-v0-2-adds-trust-signals
+    title: OKF v0.2 adds trust signals
+    author: team:google-cloud-data-cloud
+    last_modified: 2026-07-25
+---
+
+## 定義
+
+OKF は、組織の知識（テーブルのスキーマ、指標の定義、Runbook、API の仕様）を、YAML frontmatter 付き Markdown ファイルのディレクトリとして表現する仕様である。
+
+スキーマレジストリも中央管理サーバーも SDK も要らない。`cat` できれば読め、`git clone` できれば配れる、というのが設計の要。
+
+## 構成要素
+
+| 用語 | 意味 |
+|---|---|
+| Knowledge Bundle | 自己完結したディレクトリツリー。配布の単位。 |
+| Concept | 1 つの Markdown ファイル = 1 つの概念。 |
+| Concept ID | バンドル内のファイルパスから `.md` を除いたもの。 |
+| Frontmatter | 必須は `type` のみ。`title` / `description` / `resource` / `tags` が推奨。 |
+| Link | 通常の Markdown リンク。バンドル相対（`/` 始まり）が推奨。 |
+
+予約ファイル名は `index.md`（目次、progressive disclosure 用）と `log.md`（更新履歴）の 2 つだけ。それ以外の `.md` はすべて概念文書として扱われる。
+
+## v0.2 が追加したもの
+
+v0.1 が「これは何か」を記述するための形式だったのに対し、v0.2 は「読む前に判断する」ためのシグナルを frontmatter に足した。
+
+| ファミリ | フィールド | 答える問い |
+|---|---|---|
+| Provenance | `sources[]`（`author` / `usage_count` / `last_modified`） | 何から作られたか |
+| Trust | `generated` / `verified` | 誰が書き、誰が確認したか |
+| Lifecycle | `status` / `stale_after` | まだ現行か、まだ真か |
+| Attestation | `type: Attested Computation` と `runtime` / `parameters` / `executor` / `attester` | その数値は決められた手順で計算されたか |
+
+追加はすべて任意で、`type` だけを持つ概念は依然として完全に適合する。ただし不在それ自体が意味を持つようになった。`verified` が無い概念は unverified として、verified なものと区別できる。
+
+破壊的変更は 2 つ。`timestamp` は `generated.at` に、本文の `# Citations` リストは `sources` に置き換えられた。どちらも v0.2 の消費側は v0.1 形式にフォールバックできる。
+
+## 適合性
+
+バンドルが適合と言えるのは次の 3 条件を満たすときのみ。
+
+<Steps>
+  <Step title="frontmatter がパースできる">
+    予約名以外のすべての `.md` がパース可能な frontmatter を持つ。
+  </Step>
+  <Step title="type がある">
+    すべての frontmatter が空でない `type` を持つ。値は自由。
+  </Step>
+  <Step title="予約ファイルが構造に従う">
+    `index.md` と `log.md` が SPEC §8 / §9 の構造に従う。
+  </Step>
+</Steps>
+
+逆に、消費側は次の理由でバンドルを拒否してはならない。任意フィールドの欠落、未知の `type`、未知のキー、リンク切れ、`index.md` の不在である。この寛容さが仕様の中核であり、[CI での検証](/runbooks/validate-okf-bundle-in-ci)がリンク切れをエラーではなく警告として扱う根拠でもある。
+
+## 意図的に解いていない問題
+
+仕様が扱わないと明言している領域がある。アクセス制御、矛盾の解決（同じ事実について 2 つの概念が食い違うとき、どちらが正か）、そして削除の表現である。
+
+削除については、リンク切れを「まだ書かれていない知識」と解釈せよという規定が、消された知識と未執筆の知識を区別不能にしている。これは公式リポジトリの issue #207 で「silent deletion is fully conformant」と指摘されている。組織導入時にはこの前提を理解した上で、[採用スタンス](/decisions/okf-adoption-stance)を決める必要がある。
+
+## 出典
+
+- [Open Knowledge Format SPEC.md (v0.2)](https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md) — team:google-cloud-data-cloud, 2026-07-24
+- [How the Open Knowledge Format can improve data sharing](https://cloud.google.com/blog/products/data-analytics/how-the-open-knowledge-format-can-improve-data-sharing) — team:google-cloud-data-cloud, 2026-06-13
+- [OKF v0.2 adds trust signals](https://cloud.google.com/blog/products/data-analytics/okf-v0-2-adds-trust-signals) — team:google-cloud-data-cloud, 2026-07-25

@@ -1,0 +1,45 @@
+---
+title: "llms.txt"
+description: "Web サイトが自身の内容を LLM に案内するための、単一 Markdown ファイルの規約。"
+type: Format
+resource: https://llmstxt.org/
+tags: [llms-txt, discovery, web]
+status: stable
+generated: { by: claude_code/claude-opus-5, at: 2026-07-28T00:30:00Z }
+stale_after: 2026-10-31
+sources:
+  - id: llmstxt
+    resource: https://llmstxt.org/
+    title: llms.txt proposal (Jeremy Howard / Answer.AI)
+---
+
+## 定義
+
+サイトのルートに置く 1 枚の Markdown ファイルで、そのサイトが何を持っているかを LLM に案内する提案。[^llmstxt] robots.txt がクローラに対して果たす役割の、LLM 版に近い。
+
+[^llmstxt]: [llms.txt proposal](https://llmstxt.org/) — Jeremy Howard / Answer.AI
+
+## OKF との違い
+
+同じ「AI に読ませる Markdown」でも、解く問題が違う。
+
+| | llms.txt | [OKF](/formats/okf) |
+|---|---|---|
+| 単位 | サイトに 1 ファイル | 概念ごとに 1 ファイル |
+| 役割 | 発見（何があるか） | 保存（知識そのもの） |
+| 構造化 | なし | frontmatter による型、タグ、信頼シグナル |
+| 想定読者 | 外部の LLM / クローラ | 組織内外のエージェント |
+
+llms.txt は公開サイトの入口に置く案内板であり、知識を運ぶ器ではない。OKF の `index.md` が担う progressive disclosure と発想は近いが、llms.txt はバンドル全体に 1 枚、OKF の `index.md` は階層のあらゆる階に置ける点が異なる。
+
+両者は排他ではない。組織の公開ドキュメントサイトが llms.txt を持ち、その実体が OKF バンドルである、という構成に矛盾はない。
+
+## Mintlify での扱い
+
+Mintlify はこの `llms.txt` と `llms-full.txt` を自動生成し、ルートに置く。手で書く必要はなく、内容はデプロイのたびに更新される。
+
+<Note>
+自動生成される `llms.txt` は 100,000 文字を上限に切り詰められる。超える規模では、ルートに `llms.txt` を自分で置いて上書きする必要がある。
+</Note>
+
+つまり、この表の「llms.txt」列が担う発見のレイヤーは、Mintlify に載せた時点で無償で付いてくる。OKF バンドルを素で配る場合は、`index.md` を自分で手入れし続けることでしか同じ機能を得られない。

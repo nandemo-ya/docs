@@ -1,0 +1,51 @@
+---
+title: "AGENTS.md / CLAUDE.md"
+description: "リポジトリに置いてコーディングエージェントに規約と手順を指示する、慣習ベースの文脈ファイル。"
+type: Format
+resource: https://agents.md/
+tags: [agents-md, claude-md, instructions, repo]
+status: stable
+generated: { by: claude_code/claude-opus-5, at: 2026-07-28T00:30:00Z }
+stale_after: 2026-10-31
+sources:
+  - id: agentsmd
+    resource: https://agents.md/
+    title: AGENTS.md — an open convention for coding agents
+  - id: blog-v01
+    resource: https://cloud.google.com/blog/products/data-analytics/how-the-open-knowledge-format-can-improve-data-sharing
+    title: How the Open Knowledge Format can improve data sharing
+    author: team:google-cloud-data-cloud
+    last_modified: 2026-06-13
+---
+
+## 定義
+
+リポジトリのルート（あるいはホームディレクトリ）に置き、コーディングエージェントが作業前に読む文脈ファイル。ビルド手順、命名規約、触ってはいけない領域といった「振る舞いの指示」を書く。
+
+OKF の公式ブログは、この系統を「LLM-wiki パターン」の一種として明示的に参照しており、OKF はそれを組織スケールで相互運用可能にしたものだと位置づけている。
+
+## OKF との住み分け
+
+決定的な違いは、運ぶものが**指示**か**知識**かにある。
+
+| | AGENTS.md / CLAUDE.md | [OKF](/formats/okf) バンドル |
+|---|---|---|
+| 内容 | どう振る舞うべきか | チームが何を知っているか |
+| 読まれ方 | セッション開始時に丸ごと | 必要な概念だけ選択的に |
+| 構造 | 散文 | 型付き frontmatter + リンクグラフ |
+| 可搬性 | ツール固有の色が残る | Markdown + YAML のみ |
+| スケール | コンテキスト窓に律速される | progressive disclosure で回避 |
+
+実務上は併用になる。`CLAUDE.md` に「作業前に `.okf/` を参照し、作業後に得た知識を書き戻せ」と一行書くことで、指示ファイルが知識バンドルへの入口になる。この形は[採用スタンス](/decisions/okf-adoption-stance)で採る運用の前提でもある。
+
+## Mintlify も同じ場所に置きにくる
+
+Mintlify のスターターキットは、リポジトリのルートに `AGENTS.md` を同梱する。中身は「このプロジェクトは Mintlify のドキュメントサイトである」「ページは MDX + YAML frontmatter」「設定は `docs.json`」「編集には `https://mcp.mintlify.com` を使え」といった、**ドキュメントを書く作業のための指示**である。
+
+<Warning>
+ここが衝突点になる。既存リポジトリに `AGENTS.md` / `CLAUDE.md` が既にある場合、Mintlify の指示を足すと、一つのファイルが「プロダクトの開発規約」と「ドキュメントの執筆規約」を兼ねることになる。ドキュメントを別リポジトリに分けるか、`docs/AGENTS.md` に降ろすかの判断が要る。
+</Warning>
+
+## 注意
+
+両者を混ぜると壊れる。AGENTS.md に組織知を書き足していくと、セッションごとに丸ごと読まれるファイルが肥大し、コンテキスト窓を無駄に食う。知識は knowledge bundle 側に、指示は指示ファイル側に置く分離を守ること。
