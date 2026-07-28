@@ -1,72 +1,48 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "Mintlify Starter Kit",
+  "name": "nandemo-ya knowledge",
+  "description": "nandemo-ya の技術調査で得た知識を Mintlify で配信する検証用サイト。中身は OKF バンドル (research/okf-poc) と同一。",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#5F7342",
+    "light": "#9DBE72",
+    "dark": "#3D4A2A"
   },
   "favicon": "/favicon.svg",
   "navigation": {
     "pages": [
+      "index",
       {
-        "group": "Getting Started",
+        "group": "Formats",
         "pages": [
-          "index",
-          "quickstart"
+          "formats/okf",
+          "formats/llms-txt",
+          "formats/agents-md"
+        ]
+      },
+      {
+        "group": "Decisions",
+        "pages": [
+          "decisions/okf-adoption-stance"
+        ]
+      },
+      {
+        "group": "Runbooks",
+        "pages": [
+          "runbooks/validate-okf-bundle-in-ci"
         ]
       }
-    ],
-    "global": {
-      "anchors": [
-        {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
-        },
-        {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
-        }
-      ]
-    }
-  },
-  "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
-  },
-  "navbar": {
-    "links": [
-      {
-        "label": "Support",
-        "href": "mailto:hi@mintlify.com"
-      }
-    ],
-    "primary": {
-      "type": "button",
-      "label": "Dashboard",
-      "href": "https://app.mintlify.com"
-    }
+    ]
   },
   "contextual": {
     "options": [
       "copy",
       "view",
-      "chatgpt",
       "claude",
-      "perplexity",
-      "mcp",
-      "cursor",
-      "vscode"
+      "mcp"
     ]
   },
-  "footer": {
-    "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
-    }
+  "seo": {
+    "indexing": "all"
   }
 }
