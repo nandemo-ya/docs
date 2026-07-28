@@ -5,3 +5,7 @@
 # Draft content
 drafts/
 *.draft.mdx
+
+# Agent instructions are not documentation. Without this, AGENTS.md is
+# published as a page and listed in llms.txt.
+AGENTS.md
